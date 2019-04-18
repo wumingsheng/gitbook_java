@@ -3,50 +3,66 @@
 ## 字符串和日期相互转换
 
 ```java
+package com.univer.crawl.util;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
+import lombok.Generated;
+
+@Generated
 public class DateUtil {
 	
-	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	
 	//date转字符串
 	public static String format(Date date) {
-		return formatter.format(date.toInstant().atZone(ZoneId.of("Asia/Shanghai")).toLocalDateTime());
+		if(null == date) {
+			return null;
+		}
+		return DATE_FORMATTER.format(date.toInstant().atZone(ZoneId.of("Asia/Shanghai")).toLocalDateTime());
 	}
 	//字符串转date
 	public static Date parse(String date) {
-		LocalDateTime localDateTime = LocalDateTime.parse(date, formatter);
+		if(StringUtils.isBlank(date)) {
+			return null;
+		}
+		LocalDateTime localDateTime = LocalDateTime.parse(date, DATE_FORMATTER);
 		ZoneId zoneId = ZoneId.of("Asia/Shanghai");
         ZonedDateTime zdt = localDateTime.atZone(zoneId);
         return Date.from(zdt.toInstant());
     }
-
-    //获取当天的00:00:00
+	
+	
+	//得到当天的0时
 	public static Date getDayZero(Date date) {
 		if(null == date) {
 			return null;
 		}
-		long time = date.getTime();
-		long zero=time/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
-		return new Date(zero);
+	
+		Date dayZero = DateUtils.setSeconds(DateUtils.setMinutes(DateUtils.setHours(date, 0), 0), 0);
+		return dayZero;
 	}
-	//获取当天的23:59:59
+	//得到当天的23:59:59
 	public static Date getDayTwelve(Date date) {
 		if(null == date) {
 			return null;
 		}
-		long time = date.getTime();
-		long zero=time/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
-        long twelve=zero+24*60*60*1000-1;//今天23点59分59秒的毫秒数
-        return new Date(twelve);
+	
+		Date dayTwelve = DateUtils.setSeconds(DateUtils.setMinutes(DateUtils.setHours(date, 23), 59), 59);
+		return dayTwelve;
 	}
+	
+	
 
 }
+
 ```
 
 
