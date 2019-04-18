@@ -26,6 +26,26 @@ public class DateUtil {
         return Date.from(zdt.toInstant());
     }
 
+    //获取当天的00:00:00
+	public static Date getDayZero(Date date) {
+		if(null == date) {
+			return null;
+		}
+		long time = date.getTime();
+		long zero=time/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
+		return new Date(zero);
+	}
+	//获取当天的23:59:59
+	public static Date getDayTwelve(Date date) {
+		if(null == date) {
+			return null;
+		}
+		long time = date.getTime();
+		long zero=time/(1000*3600*24)*(1000*3600*24)-TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
+        long twelve=zero+24*60*60*1000-1;//今天23点59分59秒的毫秒数
+        return new Date(twelve);
+	}
+
 }
 ```
 
