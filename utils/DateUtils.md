@@ -59,7 +59,16 @@ public class DateUtil {
 		return dayTwelve;
 	}
 	
-	
+	 /**
+     * @author wumingsheng
+     * 计算两个时间点之间的天数
+     */
+    public static long getBetweenDay(Date start, Date end) {
+    	
+    	LocalDate startLocalDate = LocalDate.ofInstant(start.toInstant(),  ZoneId.of("Asia/Shanghai"));
+    	LocalDate endLocalDate = LocalDate.ofInstant(end.toInstant(),  ZoneId.of("Asia/Shanghai"));
+        return endLocalDate.toEpochDay() - startLocalDate.toEpochDay();
+    }
 
 }
 
