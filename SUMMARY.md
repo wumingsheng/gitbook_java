@@ -7,4 +7,13 @@
 * [多线程](thread/readme.md)
     * [java中多线程实现的3种方式](thread/implement.md)
 * [Java Stream API 入门篇](stream/stream-api.md)
+* [gradle项目构建工具](gradle/readme.md)
+    * [gradle使用总结](gradle/gradle-usage-summary/readme.md)
+        * [eclipse中指定gradle的java home](gradle/gradle-usage-summary/01.md)
+        * [gradle 跨工程引用](gradle/gradle-usage-summary/02.md)
+        * [Gradle 引入本地定制 jar 包](gradle/gradle-usage-summary/03.md)
+        * [gradle构建脚本基础](gradle/gradle-usage-summary/04.md)
+        * [maven-publish plugin](gradle/gradle-usage-summary/05.md)
+        * [灵铱公司－会员订单项目配置](gradle/gradle-usage-summary/06.md)
+        * [ssh plugin](gradle/gradle-usage-summary/07.md)
 
