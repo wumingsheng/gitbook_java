@@ -290,25 +290,217 @@ $ curl localhost:8080 -s|jq
 
 ## 5. 使用GsonBuilder导出null值、格式化输出、日期时间
 
+一般情况下Gson类提供的 API已经能满足大部分的使用场景，但我们需要更多更特殊、更强大的功能时，这时候就引入一个新的类 GsonBuilder。
 
 
 
+GsonBuilder从名上也能知道是用于构建Gson实例的一个类，要想改变Gson默认的设置必须使用该类配置Gson。
 
 
 
+### 5.1 默认null字段是不显示的
+
+```java
+Gson gson = new Gson();
+
+Response<List<User>> response = new Response<>();
+List<User> list = new ArrayList<>();
+list.add(new User("woms", null, new Date(), true, new String[] { "bj", "sx" }, Arrays.asList(34, 45)));
+response.setCode(200);
+response.setMessage("success");
+response.setData(list);
+
+return gson.toJson(response);
+```
+
+age字段我们设置了null, 生成的json是没有age字段的
+
+```bash
+$ curl localhost:8080 -s|jq
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "username": "woms",
+      "birthday": "May 5, 2019, 1:37:46 PM",
+      "if_married": true,
+      "addr": [
+        "bj",
+        "sx"
+      ],
+      "scores": [
+        34,
+        45
+      ]
+    }
+  ]
+}
+
+```
+
+
+如果我们这样生成一个gson
+
+```java
+GsonBuilder gsonBuilder = new GsonBuilder();
+Gson gson = gsonBuilder.serializeNulls().create();
+
+Response<List<User>> response = new Response<>();
+List<User> list = new ArrayList<>();
+list.add(new User("woms", null, new Date(), true, new String[] { "bj", "sx" }, Arrays.asList(34, 45)));
+response.setCode(200);
+response.setMessage("success");
+response.setData(list);
+
+return gson.toJson(response);
+```
+
+```json
+$ curl localhost:8080 -s|jq
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "username": "woms",
+      "age": null,  //这里是可以看到这个key的
+      "birthday": "May 5, 2019, 1:42:00 PM",
+      "if_married": true,
+      "addr": [
+        "bj",
+        "sx"
+      ],
+      "scores": [
+        34,
+        45
+      ]
+    }
+  ]
+}
+
+```
+
+
+### 5.2 格式化日期
+
+```java
+
+GsonBuilder gsonBuilder = new GsonBuilder();
+		Gson gson = gsonBuilder.serializeNulls().setDateFormat("yyyy-MM-dd").create();
+
+```
+
+
+```json
+$ curl localhost:8080 -s|jq
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "username": "woms",
+      "age": null,
+      "birthday": "2019-05-05",
+      "if_married": true,
+      "addr": [
+        "bj",
+        "sx"
+      ],
+      "scores": [
+        34,
+        45
+      ]
+    }
+  ]
+}
+
+```
+
+
+## 6. 字段过滤的几种方法
+
+
+### 6.1 基于@Expose注解
+
+
+```java
+GsonBuilder gsonBuilder = new GsonBuilder();
+Gson gson = gsonBuilder.serializeNulls()
+	.excludeFieldsWithoutExposeAnnotation()//启用expose注解  只有被注解的字段才会有效
+	.setDateFormat("yyyy-MM-dd")
+	.create();
+```
+
+```java
+@Expose //
+@Expose(deserialize = true,serialize = true) //序列化和反序列化都都生效
+@Expose(deserialize = true,serialize = false) //反序列化时生效
+@Expose(deserialize = false,serialize = true) //序列化时生效
+@Expose(deserialize = false,serialize = false) // 和不写一样
+```
+
+### 6.2 基于版本
 
 
 
+Gson在对基于版本的字段导出提供了两个注解 @Since 和 @Until,和GsonBuilder.setVersion(Double)配合使用。@Since 和 @Until都接收一个Double值。
+
+```java
+import com.google.gson.annotations.Since;
+import com.google.gson.annotations.Until;
+
+import lombok.Data;
+
+@Data
+public class Response<T> {
+	
+	
+	@Until(3.2)
+	private Integer code;
+	@Since(3.2)
+	private String message;
+	
+	
+	private T data;
+
+}
+```
+
+```java
+GsonBuilder gsonBuilder = new GsonBuilder();
+		Gson gson = gsonBuilder.serializeNulls()
+				.setVersion(3.2)//设置版本号
+				.setDateFormat("yyyy-MM-dd").create();
+```
 
 
+### 6.3 基于访问修饰符
 
+```java
+@Data
+public class Response<T> {
+	
 
+	public Integer code;
 
+	private String message;
+	
+	
+	private T data;
 
+}
 
+```
 
+```java
+import java.lang.reflect.Modifier;
 
-
+GsonBuilder gsonBuilder = new GsonBuilder();
+Gson gson = gsonBuilder.serializeNulls()
+		.excludeFieldsWithModifiers(Modifier.PUBLIC)
+		.setDateFormat("yyyy-MM-dd").create();
+```
 
 
 
