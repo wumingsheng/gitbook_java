@@ -6,6 +6,7 @@
 * [枚举](enum/readme.md)
 * [多线程](thread/readme.md)
     * [java中多线程实现的3种方式](thread/implement.md)
+    * [ThreadPoolExecutor线程池参数设置技巧](thread/ThreadPoolExecutor.md)
 * [Java Stream API 入门篇](stream/stream-api.md)
 * [gradle项目构建工具](gradle/readme.md)
     * [gradle使用总结](gradle/gradle-usage-summary/readme.md)
