@@ -4,8 +4,8 @@
 
 锁内代码在执行的时候，有时候需要满足一定的条件，当条件不满足的时候，不能执行数据的更新操作，将这些条件附加在锁上
 
-- Condition.await() 等待，条件不满足
-- Condition.signal() 条件满足
+- Condition.await() 等待，释放锁，放弃cpu的使用权，进入线程等待池等待
+- Condition.signal() 唤醒线程等待池中的一个线程
 
 
 ```java
@@ -57,7 +57,7 @@ public class BlockedQueue<T>{
 
 ```
 
-
+Lock 和 Condition 实现的管程，线程等待和通知需要调用 await()、signal()、signalAll()，它们的语义和 wait()、notify()、notifyAll() 是相同的
 
 
 
