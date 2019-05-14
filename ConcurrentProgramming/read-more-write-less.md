@@ -25,10 +25,97 @@
 2. 多个写互斥
 3. 写和多个读之间也互斥
 
+其实线程安全的缓存可以使用`Google-Guava`
+
+下面我们自己动手实现一个本地缓存
 
 
+```java
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+public class Cache {
+	
+	final static Map<String, Object> map = new HashMap<>(); 
+	
+	final static ReadWriteLock rwLock = new ReentrantReadWriteLock();
+	
+	final static Lock rLock = rwLock.readLock();
+	
+	final static Lock wLock = rwLock.writeLock();
+	
+	static Object getIfPresent(String key) {
+		
+		rLock.lock();
+		try {
+			return map.get(key);
+		} finally {
+			rLock.unlock();
+		}
+		
+	}
+	
+	static void put(String key, Object value) {
+		wLock.lock();
+		try {
+			map.put(key, value);
+		} finally {
+			wLock.unlock();
+		}
+	}
+	//实现缓存的按需加载·懒加载
+	static Object get(String key) {
+		Object v = null;
+		rLock.lock();
+		try {
+			v = map.get(key);
+		} finally {
+			rLock.unlock();
+		}
+		if(null != v) {
+			return v;
+		}
+		wLock.lock();
+		try {
+			// 再次验证
+			// 其他线程可能已经查询过数据库,因为读线程不互斥
+			v = map.get(key);
+			if (v == null) {
+				v = new Random().nextInt();//查询数据库
+				map.put(key, v);
+			} 
+		} finally {
+			wLock.lock();
+		}
+		
+		return v;
+	}
 
 
+	
+	
+
+}
+
+```
+
+## StampedLock
+
+
+StampedLock 支持的三种锁模式
+
+我们先来看看在使用上 StampedLock 和上一篇文章讲的 ReadWriteLock 有哪些区别。
+
+ReadWriteLock 支持两种模式：一种是读锁，一种是写锁。
+
+    而 StampedLock支持三种模式，分别是：写锁、悲观读锁和乐观读。
+    其中，写锁、悲观读锁的语义和 ReadWriteLock的写锁、读锁的语义非常类似，允许多个线程同时获取悲观读锁，但是只允许一个线程获取写锁，写锁和悲观读锁是互斥的。
+    不同的是：StampedLock里的写锁和悲观读锁加锁成功之后，都会返回一个 stamp；然后解锁的时候，需要传入这个stamp。相关的示例代码如下。
 
 
 
