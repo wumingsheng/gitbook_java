@@ -195,13 +195,44 @@ tampedLock 的性能之所以比 ReadWriteLock 还要好，其关键是 StampedL
 ReadWriteLock 支持多个线程同时读，但是当多个线程同时读的时候，所有的写操作会被阻塞；
 而 StampedLock 提供的乐观读，是允许一个线程获取写锁的，也就是说不是所有的写操作都被阻塞。
 
+注意这里，我们用的是“乐观读”这个词，而不是“乐观读锁”，是要提醒你，乐观读这个操作是无锁的，所以相比较 ReadWriteLock 的读锁，乐观读的性能更好一些。
 
 
+文中下面这段代码是出自 Java SDK 官方示例，并略做了修改。在 distanceFromOrigin() 这个方法中，首先通过调用 tryOptimisticRead() 获取了一个 stamp，这里的 tryOptimisticRead() 就是我们前面提到的乐观读。之后将共享变量 x 和 y 读入方法的局部变量中，不过需要注意的是，由于 tryOptimisticRead() 是无锁的，所以共享变量 x 和 y 读入方法局部变量时，x 和 y 有可能被其他线程修改了。因此最后读完之后，还需要再次验证一下是否存在写操作，这个验证操作是通过调用 validate(stamp) 来实现的。
 
+```java
+class Point {
+  private int x, y;
+  final StampedLock sl = 
+    new StampedLock();
+  // 计算到原点的距离  
+  int distanceFromOrigin() {
+    // 乐观读
+    long stamp = sl.tryOptimisticRead();
+    // 读入局部变量，
+    // 读的过程数据可能被修改
+    int curX = x, curY = y;
+    // 判断执行读操作期间，
+    // 是否存在写操作，如果存在，
+    // 则 sl.validate 返回 false
+    if (!sl.validate(stamp)){
+      // 升级为悲观读锁
+      stamp = sl.readLock();
+      try {
+        curX = x;
+        curY = y;
+      } finally {
+        // 释放悲观读锁
+        sl.unlockRead(stamp);
+      }
+    }
+    return Math.sqrt(
+      curX * curX + curY * curY);
+  }
+}
 
+```
 
-
-
-
+==hhhh==
 
 
