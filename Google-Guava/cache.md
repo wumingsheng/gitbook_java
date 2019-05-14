@@ -81,6 +81,78 @@ final static Cache<String, Object> cache = CacheBuilder.newBuilder()
 		System.out.println(object);
 	}
 ```
+## 2. 缓存回收
+
+一个残酷的现实是，我们几乎一定没有足够的内存缓存所有数据。你你必须决定：什么时候某个缓存项就不值得保留了？
+
+1. 显示回收
+  * 个别清除：Cache.invalidate(key)
+  * 批量清除：Cache.invalidateAll(keys)
+  * 清除所有缓存项：Cache.invalidateAll()
+2. 自动回收
+  * 基于容量回收
+  * 定时回收
+  * 基于引用回收。
+
+### 2.1 基于容量的回收（size-based eviction）
+
+如果要规定缓存项的数目不超过固定值，只需使用`CacheBuilder.maximumSize(long)`。缓存将尝试回收最近没有使用或总体上很少使用的缓存项。
+
+```java
+	final static Cache<String, User> cache = CacheBuilder.newBuilder()
+			.maximumSize(1000)//缓冲最大容量
+			.maximumWeight(10000)//最大权重值
+			.weigher(new Weigher<String, User>() {//权重计算方式
+
+				@Override
+				public int weigh(String key, User user) {
+					return user.getAge();
+				}
+			})
+			.build();
+```
+### 2.2 定时回收（Timed Eviction）
+
+CacheBuilder提供两种定时回收的方法：
+
+- expireAfterAccess(long, TimeUnit)：缓存项在给定时间内没有被读/写访问，则回收。请注意这种缓存的回收顺序和基于大小回收一样。
+- expireAfterWrite(long,TimeUnit)：缓存项在给定时间内没有被写访问（创建或覆盖），则回收。
+
+> expireAfterWrite如果认为缓存数据总是在固定时候后变得陈旧不可用，这种回收方式是可取的。
+
+### 2.3 基于引用的回收（Reference-based Eviction）
+
+通过使用弱引用的键、或弱引用的值、或软引用的值，Guava Cache可以把缓存设置为允许垃圾回收：
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
