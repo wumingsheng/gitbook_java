@@ -24,8 +24,8 @@
 
 1. 显示设置`cache.put(key, value)`
 2. 自动加载
-    1. CacheLoader
-    2. Callable
+    * CacheLoader
+    * Callable
 
 ### 1.1 CacheLoader
 
