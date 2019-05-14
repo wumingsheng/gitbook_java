@@ -21,7 +21,7 @@
 ## 保存数据
 
 保存数据分两种情况：
-1. 显示设置
+1. 显示设置`cache.put(key, value)`
 2. 自动加载
   1. CacheLoader
   2. Callable
