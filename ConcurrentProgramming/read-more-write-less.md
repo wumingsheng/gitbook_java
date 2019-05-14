@@ -120,6 +120,77 @@ ReadWriteLock 支持两种模式：一种是读锁，一种是写锁。
 
 
 
+代码演示写锁和悲观读锁，这个功能和上面的ReadWriteLock有异曲同工之妙
+
+```java
+package com.example.lua.demo;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.locks.StampedLock;
+
+public class Cache {
+	
+	final static Map<String, Object> map = new HashMap<>(); 
+	
+	final static StampedLock sl = new StampedLock();
+	
+	static Object getIfPresent(String key) {
+		
+		long stamp = sl.readLock();
+		try {
+			return map.get(key);
+		} finally {
+			sl.unlockRead(stamp);
+		}
+		
+	}
+	
+	static void put(String key, Object value) {
+		long stamp = sl.writeLock();
+		try {
+			map.put(key, value);
+		} finally {
+			sl.unlockWrite(stamp);
+		}
+	}
+	//实现缓存的按需加载·懒加载
+	static Object get(String key) {
+		Object v = null;
+		long stamp = sl.readLock();
+		try {
+			v = map.get(key);
+		} finally {
+			sl.unlockRead(stamp);
+		}
+		if(null != v) {
+			return v;
+		}
+		long stamp1 = sl.writeLock();
+		try {
+			// 再次验证
+			// 其他线程可能已经查询过数据库,因为读线程不互斥
+			v = map.get(key);
+			if (v == null) {
+				v = new Random().nextInt();//查询数据库
+				map.put(key, v);
+			} 
+		} finally {
+			sl.unlockWrite(stamp1);
+		}
+		
+		return v;
+	}
+
+
+	
+	
+
+}
+```
+
+
 
 
 
