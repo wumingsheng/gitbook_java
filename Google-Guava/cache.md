@@ -21,10 +21,11 @@
 ## 1. 保存数据
 
 保存数据分两种情况：
+
 1. 显示设置`cache.put(key, value)`
 2. 自动加载
-  1. CacheLoader
-  2. Callable
+    1. CacheLoader
+    2. Callable
 
 ### 1.1 CacheLoader
 
@@ -55,7 +56,7 @@
 			});
 ```
 
-## 1.2 Callable 
+### 1.2 Callable 
 
 所有类型的Guava Cache，不管有没有自动加载功能，都支持`get(K,Callable<V>)`方法。
 
