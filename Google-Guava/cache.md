@@ -18,7 +18,7 @@
 
 > 如果你不需要Cache中的特性，使用ConcurrentHashMap有更好的内存效率
 
-## 保存数据
+## 1. 保存数据
 
 保存数据分两种情况：
 1. 显示设置`cache.put(key, value)`
@@ -26,7 +26,7 @@
   1. CacheLoader
   2. Callable
 
-## CacheLoader
+### 1.1 CacheLoader
 
 ```java
 //缓存接口这里是LoadingCache，LoadingCache在缓存项不存在时可以自动加载缓存
@@ -55,7 +55,7 @@
 			});
 ```
 
-## Callable 
+## 1.2 Callable 
 
 所有类型的Guava Cache，不管有没有自动加载功能，都支持`get(K,Callable<V>)`方法。
 
