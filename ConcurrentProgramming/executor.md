@@ -116,7 +116,21 @@ Future<?> submit(Runnable task);
 <T> Future<T> submit(Runnable task, T result);
 ```
 
+1. 提交 Runnable 任务 submit(Runnable task) ：这个方法的参数是一个 Runnable 接口，Runnable 接口的 run()方法是没有返回值的，
+所以 submit(Runnable task) 这个方法返回的 Future仅可以用来断言任务已经结束了，类似于 Thread.join()。
+2. 提交 Callable 任务 submit(Callable<T> task)：这个方法的参数是一个 Callable 接口，它只有一个 call() 方法，并且这个方法是有返回值的，
+所以这个方法返回的 Future 对象可以通过调用其 get() 方法来获取任务的执行结果。
+3. result 相当于主线程和子线程之间的桥梁，通过它主子线程可以共享数据。
 
+你会发现它们的返回值都是 Future 接口，Future 接口有 5 个方法，我都列在下面了，它们分别是：
+
+- 取消任务的方法 cancel()
+- 判断任务是否已取消的方法 isCancelled()
+- 判断任务是否已结束的方法 isDone()
+- 以及2 个获得任务执行结果的 get() 和 get(timeout, unit)，其中最后一个 get(timeout, unit) 支持超时机制。
+
+通过 Future 接口的这 5 个方法你会发现，我们提交的任务不但能够获取任务执行结果，还可以取消任务。
+不过需要注意的是：这两个 get() 方法都是阻塞式的，如果被调用的时候，任务还没有执行完，那么调用 get() 方法的线程会阻塞，直到任务执行完才会被唤醒。
 
 
 
