@@ -518,11 +518,52 @@ System.out.println(f0.join());
 ```
 
 
+## 4. 那个任务先完成就先处理哪个CompletionService
+
+CompletionService 的实现原理也是内部维护了一个阻塞队列，当任务执行结束就把任务的执行结果的 Future 对象加入到阻塞队列
+
+### 4.1 创建 CompletionService
+
+1. ExecutorCompletionService(Executor executor)；
+2. ExecutorCompletionService(Executor executor, BlockingQueue<Future<V>> completionQueue)。
+
+这两个构造方法都需要传入一个线程池，如果不指定 completionQueue，那么默认会使用无界的 LinkedBlockingQueue。任务执行结果的 Future 对象就是加入到 completionQueue 中。
+CompletionService 接口提供的 take() 方法获取一个 Future 对象
+
+```java
+ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 10, 5, TimeUnit.MINUTES,
+				new ArrayBlockingQueue<>(30), Executors.defaultThreadFactory(), new AbortPolicy());
+		threadPoolExecutor.prestartAllCoreThreads(); // 预启动所有核心线程
+		
+	
+	
+		ExecutorCompletionService<Integer> executorCompletionService = new ExecutorCompletionService<>(threadPoolExecutor);
+		
+		executorCompletionService.submit(() -> {
+			return new Random().nextInt();
+		});
+		executorCompletionService.submit(() -> {
+			return new Random().nextInt();
+		});
+		executorCompletionService.submit(() -> {
+			return new Random().nextInt();
+		});
+		
+		for (int i = 0; i < 3; i++) {
+			Future<Integer> future = executorCompletionService.take();//获取从阻塞队列获取一个结果
+			Integer integer = future.get();
+			System.out.println(integer);
+		}
+		
+		threadPoolExecutor.shutdown();
+
+```
 
 
-
-
-
+> 都是和阻塞队列相关的，take()、poll()都是从阻塞队列中获取并移除一个元素；它们的区别在于如果阻塞队列是空的，那么调用 take()
+方法的线程会被阻塞，而 poll() 方法会返回 null 值。 poll(long timeout, TimeUnit unit)
+方法支持以超时的方式获取并移除阻塞队列头部的一个元素，如果等待了 timeout unit
+时间，阻塞队列还是空的，那么该方法会返回 null 值。
 
 
 
