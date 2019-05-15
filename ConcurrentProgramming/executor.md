@@ -410,10 +410,10 @@ CompletableFuture.supplyAsync(Supplier<U> supplier,Executor executor)
 
 1. 串行关系
 
-* thenApply：接收参数并且提供返回值
-* thenAccept：支持参数，不支持返回值
-* thenRun：不支持参数，也不支持返回值
-* thenCompose：和thenApply相似，方法会创建一个子流程
+    * thenApply：接收参数并且提供返回值
+    * thenAccept：支持参数，不支持返回值
+    * thenRun：不支持参数，也不支持返回值
+    * thenCompose：和thenApply相似，方法会创建一个子流程
 
 ```java
 ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 10, 5, TimeUnit.MINUTES,
