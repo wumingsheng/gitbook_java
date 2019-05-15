@@ -310,7 +310,7 @@ public class Main {
 ```
 
 
-## 3. CompletableFuture
+## 3. Future增强CompletableFuture
 
 ![](/assets/20190515145359.png)
 
@@ -403,6 +403,41 @@ CompletableFuture.supplyAsync(Supplier<U> supplier,Executor executor)
 另外，CompletableFuture 类还实现了 CompletionStage 接口，这个接口内容实在是太丰富了，在 1.8 版本里有 40 个方法，这些方法我们该如何理解呢？
 
 
+### 3.2 CompletionStage
+
+
+![](/assets/20190515155920.png)
+
+1. 串行关系
+
+* thenApply：接收参数并且提供返回值
+* thenAccept：支持参数，不支持返回值
+* thenRun：不支持参数，也不支持返回值
+* thenCompose：和thenApply相似，方法会创建一个子流程
+
+```java
+ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 10, 5, TimeUnit.MINUTES,
+				new ArrayBlockingQueue<>(30), Executors.defaultThreadFactory(), new AbortPolicy());
+threadPoolExecutor.prestartAllCoreThreads(); // 预启动所有核心线程
+
+
+
+CompletableFuture<String> f2 = CompletableFuture.supplyAsync(()-> "helloworld", threadPoolExecutor)
+        .thenApply(s -> s + " hellofuture")
+        .thenApply(String::toUpperCase);
+String string = f2.get();
+
+System.out.println(string);//HELLOWORLD HELLOFUTURE
+
+
+threadPoolExecutor.shutdown();
+```
+
+2. and聚合关系
+
+3. or聚合关系
+
+4. 异常处理
 
 
 
