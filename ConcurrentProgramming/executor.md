@@ -314,7 +314,70 @@ public class Main {
 
 ![](/assets/20190515145359.png)
 
+---
 
+```java
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
+import java.util.concurrent.TimeUnit;
+
+public class Main {
+
+	public static void main(String[] args) throws Exception {
+		ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 10, 5, TimeUnit.MINUTES,
+				new ArrayBlockingQueue<>(30), Executors.defaultThreadFactory(), new AbortPolicy());
+		threadPoolExecutor.prestartAllCoreThreads(); // 预启动所有核心线程
+		
+		CompletableFuture<Void> f1 = CompletableFuture.runAsync(()->{
+			System.out.println("t1--- 洗水壶");
+			sleep(1, TimeUnit.SECONDS);
+			System.out.println("t1---烧开水");
+			sleep(15, TimeUnit.SECONDS);
+		}, threadPoolExecutor);
+		
+		CompletableFuture<String> f2 = CompletableFuture.supplyAsync(()->{
+			System.out.println("t2--- 洗茶壶");
+			sleep(1, TimeUnit.SECONDS);
+			System.out.println("t2---洗茶杯");
+			sleep(2, TimeUnit.SECONDS);
+			System.out.println("t2---拿茶叶");
+			sleep(1, TimeUnit.SECONDS);
+			return "龙井";
+		}, threadPoolExecutor);
+		
+		CompletableFuture<String> f3 = f1.thenCombineAsync(f2, (__, tf) -> {
+			System.out.println("t3---拿到茶叶");
+			System.out.println("t3---泡茶");
+			
+			return "上茶" + tf;
+		}, threadPoolExecutor);
+
+		f3.join();//等待任务3执行结果
+		
+		threadPoolExecutor.shutdown();
+
+	}
+	
+	static void sleep(int t, TimeUnit u) {
+
+			try {
+				u.sleep(t);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+	}
+	
+
+	
+
+}
+```
 
 
 
