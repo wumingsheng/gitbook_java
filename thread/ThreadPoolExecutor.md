@@ -81,6 +81,23 @@
 ## 4. code
 
 ```java
+@Bean
+public Executor echartExecutor() {
+    log.info("ThreadPoolExecutor echartExecutor init ... ");
+    ThreadPoolExecutor threadPoolExecutor = 
+            new ThreadPoolExecutor(10, 100, 30, TimeUnit.MINUTES, new ArrayBlockingQueue<>(2),
+                    Executors.defaultThreadFactory(), new AbortPolicy());
+    log.info("ThreadPoolExecutor echartExecutor init completed  !!! ");
+    threadPoolExecutor.prestartAllCoreThreads(); // 预启动所有核心线程
+    return threadPoolExecutor;
+}
+
+```
+
+
+spring有自己线程池
+
+```java
 public class AsyncConfig implements AsyncConfigurer {
 
 	@Override
