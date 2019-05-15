@@ -102,7 +102,9 @@ newScheduledThreadPool(int corePoolSize) //创建一个支持定时及周期性�
 并且在实际工作中，自定义的拒绝策略往往和降级策略配合使用。
 
 
-## 2. Future
+## 2. Future & FutureTask
+
+### 2.1 Future
 
 Java 通过 ThreadPoolExecutor 提供的 3 个 submit() 方法和 1 个 FutureTask 工具类来支持获得任务执行结果的需求。
 下面我们先来介绍这 3 个 submit() 方法，这 3 个方法的方法签名如下。
@@ -122,6 +124,62 @@ Future<?> submit(Runnable task);
 所以这个方法返回的 Future 对象可以通过调用其 get() 方法来获取任务的执行结果。
 3. result 相当于主线程和子线程之间的桥梁，通过它主子线程可以共享数据。
 
+```java
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
+import java.util.concurrent.TimeUnit;
+
+public class Main {
+
+	public static void main(String[] args) throws Exception {
+		ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 10, 5, TimeUnit.MINUTES,
+				new ArrayBlockingQueue<>(30), Executors.defaultThreadFactory(), new AbortPolicy());
+		threadPoolExecutor.prestartAllCoreThreads(); // 预启动所有核心线程
+		Data data = new Main().new Data();
+		
+		Future<Data> future = threadPoolExecutor.submit(new Main().new Task(data), data);
+		TimeUnit.SECONDS.sleep(2);
+		System.out.println(data.getName());
+		System.out.println(future.get().getName());//future.get() === result
+
+		threadPoolExecutor.shutdown();
+
+	}
+	
+	class Data {
+	    String name;
+
+	    public String getName() {
+	        return name;
+	    }
+
+	    public void setName(String name) {
+	        this.name = name;
+	    }
+	}
+
+	class Task implements Runnable {
+		Data data;
+		public Task(Data result) {
+			this.data = result;
+		}
+
+		@Override
+		public void run() {
+			System.out.println("run ============");
+			data.setName("222");
+
+		}
+
+	}
+}
+
+```
+
 你会发现它们的返回值都是 Future 接口，Future 接口有 5 个方法，我都列在下面了，它们分别是：
 
 - 取消任务的方法 cancel()
@@ -134,6 +192,11 @@ Future<?> submit(Runnable task);
 
 
 
+
+### 2.2 FutureTask
+
+下面我们再来介绍 FutureTask 工具类。前面我们提到的 Future 是一个接口，而 FutureTask 是一个实实在在的工具类，这个工具类有两个构造函数，
+它们的参数和前面介绍的 submit() 方法类似，所以这里我就不再赘述了。
 
 
 
