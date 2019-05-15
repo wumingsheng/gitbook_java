@@ -98,10 +98,23 @@ newScheduledThreadPool(int corePoolSize) //创建一个支持定时及周期性�
 ### 1.4 使用线程池的注意事项
 
 1. 强烈建议使用有界队列，这也是不推荐使用`Executors`的原因（Executors使用的都是无界队列容易发生OOM）
-2. 使用有界队列，任务过多时候，容易发生拒绝策略，默认的拒绝策略是：throw
-   RuntimeException.**默认拒绝策略要慎重使用**，建议自定义自己的拒绝策略；并且在实际工作中，自定义的拒绝策略往往和降级策略配合使用。
+2. 使用有界队列，任务过多时候，容易发生拒绝策略，默认的拒绝策略是：throw RuntimeException. **默认拒绝策略要慎重使用**，建议自定义自己的拒绝策略；
+并且在实际工作中，自定义的拒绝策略往往和降级策略配合使用。
 
 
+## 2. Future
+
+Java 通过 ThreadPoolExecutor 提供的 3 个 submit() 方法和 1 个 FutureTask 工具类来支持获得任务执行结果的需求。
+下面我们先来介绍这 3 个 submit() 方法，这 3 个方法的方法签名如下。
+
+```java
+// 提交 Runnable 任务 没有返回结果
+Future<?> submit(Runnable task);
+// 提交 Callable 任务 有返回结果
+<T> Future<T> submit(Callable<T> task);
+// 提交 Runnable 任务及结果引用  
+<T> Future<T> submit(Runnable task, T result);
+```
 
 
 
