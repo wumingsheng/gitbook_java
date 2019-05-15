@@ -482,16 +482,40 @@ CompletableFuture<String> completableFuture1 = CompletableFuture.supplyAsync(()-
 4. 异常处理
 
 
+虽然上面我们提到的 fn、consumer、action 它们的核心方法都不允许抛出可检查异常，但是却无法限制它们抛出运行时异常，例如下面的代码，执行 7/0 就会出现除零错误这个运行时异常。非异步编程里面，我们可以使用 try{}catch{}来捕获并处理异常，那在异步编程里面，异常该如何处理呢？
 
 
+```java
+	
+CompletableFuture<Integer> f0 = CompletableFuture.supplyAsync(()->(7/0)).thenApply(r->r*10);
+
+System.out.println(f0.join());
 
 
+```
 
+```java
+CompletionStage exceptionally(fn);
 
+CompletionStage<R> whenComplete(consumer);
 
+CompletionStage<R> whenCompleteAsync(consumer);
 
+CompletionStage<R> handle(fn);
 
+CompletionStage<R> handleAsync(fn);
 
+```
+
+下面的示例代码展示了如何使用 exceptionally() 方法来处理异常，exceptionally() 的使用非常类似于 try{}catch{}中的 catch{}，但是由于支持链式编程方式，所以相对更简单。既然有 try{}catch{}，那就一定还有 try{}finally{}，whenComplete() 和 handle() 系列方法就类似于 try{}finally{}中的 finally{}，无论是否发生异常都会执行 whenComplete() 中的回调函数 consumer 和 handle() 中的回调函数 fn。whenComplete() 和 handle() 的区别在于 whenComplete() 不支持返回结果，而 handle() 是支持返回结果的。
+
+```java
+CompletableFuture<Integer> f0 = CompletableFuture.supplyAsync(()->7/0))
+    .thenApply(r->r*10)
+    .exceptionally(e->0);
+
+System.out.println(f0.join());
+```
 
 
 
