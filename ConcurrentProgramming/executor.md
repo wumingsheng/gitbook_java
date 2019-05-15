@@ -198,6 +198,146 @@ public class Main {
 下面我们再来介绍 FutureTask 工具类。前面我们提到的 Future 是一个接口，而 FutureTask 是一个实实在在的工具类，这个工具类有两个构造函数，
 它们的参数和前面介绍的 submit() 方法类似，所以这里我就不再赘述了。
 
+```java
+    
+FutureTask(Callable<V> callable);
+FutureTask(Runnable runnable, V result);
+```
+
+那如何使用 FutureTask 呢？其实很简单，FutureTask 实现了 Runnable 和 Future 接口，由于实现了 Runnable 接口，所以可以将 FutureTask 对象作为任务提交给 ThreadPoolExecutor 去执行，也可以直接被 Thread 执行；又因为实现了 Future 接口，所以也能用来获得任务的执行结果。下面的示例代码是将 FutureTask 对象提交给 ThreadPoolExecutor 去执行。
+
+```java
+	ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 10, 5, TimeUnit.MINUTES,
+				new ArrayBlockingQueue<>(30), Executors.defaultThreadFactory(), new AbortPolicy());
+		threadPoolExecutor.prestartAllCoreThreads(); // 预启动所有核心线程
+		
+		FutureTask<String> futureTask = new FutureTask<>(()-> "111");
+		threadPoolExecutor.submit(futureTask);
+		String string = futureTask.get();//这里主线程会阻塞等待副线程完成
+		
+		
+		System.out.println(string);//111
+
+		threadPoolExecutor.shutdown();
+
+```
+
+
+也可以使用线程去执行
+
+```java
+FutureTask<String> futureTask = new FutureTask<>(()-> "111");
+new Thread(futureTask).start();
+String string = futureTask.get();//这里主线程会阻塞等待副线程完成
+```
+
+
+### 2.3 各个子线程结果相互引用案例
+
+思路：通过构造器把T1线程的FutureTask传给T2线程
+
+![](/assets/20190515143646.png)
+
+```java
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
+import java.util.concurrent.TimeUnit;
+
+public class Main {
+
+	public static void main(String[] args) throws Exception {
+		ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 10, 5, TimeUnit.MINUTES,
+				new ArrayBlockingQueue<>(30), Executors.defaultThreadFactory(), new AbortPolicy());
+		threadPoolExecutor.prestartAllCoreThreads(); // 预启动所有核心线程
+		FutureTask<String> futureTask2 = new FutureTask<>(new Main().new T2());
+		FutureTask<String> futureTask1 = new FutureTask<>(new Main().new T1(futureTask2));
+		threadPoolExecutor.submit(futureTask1);
+		threadPoolExecutor.submit(futureTask2);
+		String result = futureTask1.get();
+		System.out.println(result);
+
+		threadPoolExecutor.shutdown();
+
+	}
+	
+	class T1 implements Callable<String> {
+		
+		FutureTask<String> t2;
+
+		public T1(FutureTask<String> t2) {
+			this.t2 = t2;
+		}
+		
+		@Override
+		public String call() throws Exception {
+			System.out.println("洗水壶1分钟");
+			TimeUnit.SECONDS.sleep(1);
+			System.out.println("烧开水15分钟");
+			TimeUnit.SECONDS.sleep(15);
+			String tea = t2.get();//获取t2子线程的运行结果
+			System.out.println("开始泡制" + tea);
+			return "泡茶完成";
+		}
+		
+	}
+	
+	class T2 implements Callable<String> {
+		
+
+		
+		@Override
+		public String call() throws Exception {
+			System.out.println("洗茶壶1分钟");
+			TimeUnit.SECONDS.sleep(1);
+			System.out.println("洗茶杯2分钟");
+			TimeUnit.SECONDS.sleep(2);
+			
+			System.out.println("拿茶叶1分钟");
+			TimeUnit.SECONDS.sleep(1);
+			return "龙井";
+		}
+		
+	}
+	
+
+}
+
+```
+
+
+## 3. CompletableFuture
+
+![](/assets/20190515145359.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
