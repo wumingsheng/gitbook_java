@@ -435,7 +435,49 @@ threadPoolExecutor.shutdown();
 
 2. and聚合关系
 
+```java
+
+CompletionStage<R> thenCombine(other, fn);//接收参数和返回值
+CompletionStage<R> thenCombineAsync(other, fn);
+CompletionStage<Void> thenAcceptBoth(other, consumer);//接收参数，不接受返回值
+CompletionStage<Void> thenAcceptBothAsync(other, consumer);
+CompletionStage<Void> runAfterBoth(other, action);//不支持参数和返回值
+CompletionStage<Void> runAfterBothAsync(other, action);
+
+```
+
+
 3. or聚合关系
+
+```java
+CompletionStage applyToEither(other, fn);
+CompletionStage applyToEitherAsync(other, fn);
+CompletionStage acceptEither(other, consumer);
+CompletionStage acceptEitherAsync(other, consumer);
+CompletionStage runAfterEither(other, action);
+CompletionStage runAfterEitherAsync(other, action);
+
+```
+
+> fn：接收参数和返回值 consumer: 接收参数不接受返回值   action: 不接受参数和返回值
+
+```java
+CompletableFuture<String> completableFuture1 = CompletableFuture.supplyAsync(()->{
+			int nextInt = new Random().nextInt(5);
+			sleep(nextInt, TimeUnit.SECONDS);
+			return String.valueOf(nextInt);
+		});
+		
+		CompletableFuture<String> completableFuture2 = CompletableFuture.supplyAsync(()->{
+			int nextInt = new Random().nextInt(5);
+			sleep(nextInt, TimeUnit.SECONDS);
+			return String.valueOf(nextInt);
+		});
+		CompletableFuture<String> completableFuture = completableFuture1.applyToEither(completableFuture2, s -> s);
+		String string = completableFuture.get();
+		System.out.println(string);
+```
+
 
 4. 异常处理
 
