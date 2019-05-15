@@ -95,7 +95,11 @@ newSingleThreadExecutor() //创建一个单线程化的Executor
 newScheduledThreadPool(int corePoolSize) //创建一个支持定时及周期性的任务执行的线程池，多数情况下可用来替代Timer类。
 ```
 
+### 1.4 使用线程池的注意事项
 
+1. 强烈建议使用有界队列，这也是不推荐使用`Executors`的原因（Executors使用的都是无界队列容易发生OOM）
+2. 使用有界队列，任务过多时候，容易发生拒绝策略，默认的拒绝策略是：throw
+   RuntimeException.**默认拒绝策略要慎重使用**，建议自定义自己的拒绝策略；并且在实际工作中，自定义的拒绝策略往往和降级策略配合使用。
 
 
 
