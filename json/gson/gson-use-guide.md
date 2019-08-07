@@ -503,6 +503,10 @@ Gson gson = gsonBuilder.serializeNulls()
 ```
 
 
+## 7. 禁用特殊字符转移
 
+```java
+Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+```
 
 
